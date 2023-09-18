@@ -15,6 +15,45 @@ warnings.filterwarnings("ignore")
 PREDICTOR_FILE_NAME = "predictor.joblib"
 
 
+from typing import List
+
+def clean_and_ensure_unique(names: List[str]) -> List[str]:
+    """
+    Clean the provided column names by removing special characters and ensure their
+    uniqueness.
+
+    The function first removes any non-alphanumeric character (except underscores)
+    from the names. Then, it ensures the uniqueness of the cleaned names by appending
+    a counter to any duplicates.
+
+    Args:
+        names (List[str]): A list of column names to be cleaned.
+
+    Returns:
+        List[str]: A list of cleaned column names with ensured uniqueness.
+
+    Example:
+        >>> clean_and_ensure_unique(['3P%', '3P', 'Name', 'Age%', 'Age'])
+        ['3P', '3P_1', 'Name', 'Age', 'Age_1']
+    """
+
+    # First, clean the names
+    cleaned_names = [re.sub('[^A-Za-z0-9_]+', '', name) for name in names]
+
+    # Now ensure uniqueness
+    seen = {}
+    for i, name in enumerate(cleaned_names):
+        original_name = name
+        counter = 1
+        while name in seen:
+            name = original_name + "_" + str(counter)
+            counter += 1
+        seen[name] = True
+        cleaned_names[i] = name
+
+    return cleaned_names
+
+
 class Regressor:
     """A wrapper class for the LightGBM Regressor.
 
@@ -63,7 +102,7 @@ class Regressor:
             learning_rate=self.learning_rate,
             n_estimators=self.n_estimators,
             num_iterations=500,
-            random_state=42,
+            random_state=42
         )
         return model
 
@@ -75,8 +114,11 @@ class Regressor:
             train_targets (pandas.Series): The labels of the training data.
         """
         # lightgbm throws an error if column names contain special characters
-        updated_train_inputs = train_inputs.rename(
-            columns=lambda x: re.sub("[^A-Za-z0-9_]+", "", x)
+        updated_column_names = clean_and_ensure_unique(
+            train_inputs.columns.tolist()
+        )
+        updated_train_inputs = pd.DataFrame(
+            train_inputs.values, columns=updated_column_names
         )
         self.model.fit(updated_train_inputs, train_targets)
         self._is_trained = True
