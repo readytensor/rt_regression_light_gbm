@@ -63,7 +63,7 @@ class Regressor:
             learning_rate=self.learning_rate,
             n_estimators=self.n_estimators,
             num_iterations=500,
-            random_state=42
+            random_state=42,
         )
         return model
 
@@ -75,8 +75,9 @@ class Regressor:
             train_targets (pandas.Series): The labels of the training data.
         """
         # lightgbm throws an error if column names contain special characters
-        updated_train_inputs = \
-            train_inputs.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
+        updated_train_inputs = train_inputs.rename(
+            columns=lambda x: re.sub("[^A-Za-z0-9_]+", "", x)
+        )
         self.model.fit(updated_train_inputs, train_targets)
         self._is_trained = True
 
