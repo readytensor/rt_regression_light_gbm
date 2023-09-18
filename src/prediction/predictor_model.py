@@ -1,4 +1,5 @@
 import os
+import re
 import warnings
 from typing import Optional
 
@@ -73,7 +74,10 @@ class Regressor:
             train_inputs (pandas.DataFrame): The features of the training data.
             train_targets (pandas.Series): The labels of the training data.
         """
-        self.model.fit(train_inputs, train_targets)
+        # lightgbm throws an error if column names contain special characters
+        updated_train_inputs = \
+            train_inputs.rename(columns = lambda x:re.sub('[^A-Za-z0-9_]+', '', x))
+        self.model.fit(updated_train_inputs, train_targets)
         self._is_trained = True
 
     def predict(self, inputs: pd.DataFrame) -> np.ndarray:
