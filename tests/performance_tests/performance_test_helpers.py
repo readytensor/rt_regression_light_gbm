@@ -50,10 +50,8 @@ def generate_schema_and_data(rows: int, columns: int) -> Tuple[Dict, pd.DataFram
         "description": "ID",
         "modelCategory": "regression",
         "schemaVersion": 1.0,
-        "inputDataFormat": {
-            "type": "CSV",
-            "encoding": "utf-8",
-        },
+        "inputDataFormat": "CSV",
+        "encoding": "utf-8",
         "id": {
             "name": "id",
             "description": "A unique identifier for each record in the dataset.",
